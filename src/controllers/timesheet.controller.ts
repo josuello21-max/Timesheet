@@ -94,21 +94,50 @@ export const createOrGetTimesheet = async (req: AuthRequest, res: Response): Pro
                                 select: {
                                     id: true,
                                     name: true,
+                                    code: true,
                                     client: {
                                         select: {
                                             name: true,
+                                            color: true,
+                                        },
+                                    },
+                                    campaign: {
+                                        select: {
+                                            name: true,
+                                            brand: {
+                                                select: {
+                                                    name: true,
+                                                },
+                                            },
                                         },
                                     },
                                 },
                             },
                             task: {
                                 select: {
+                                    id: true,
                                     name: true,
+                                    nameEs: true,
+                                    type: true,
+                                },
+                            },
+                        },
+                        orderBy: {
+                            date: 'asc',
+                        },
+                    },
+                    approvals: {
+                        include: {
+                            approver: {
+                                select: {
+                                    id: true,
+                                    firstName: true,
+                                    lastName: true,
+                                    email: true,
                                 },
                             },
                         },
                     },
-                    approvals: true,
                 },
             });
         }
