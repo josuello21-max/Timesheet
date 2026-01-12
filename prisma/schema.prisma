@@ -1,0 +1,346 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+enum UserRole {
+  EMPLOYEE
+  MANAGER
+  FINANCE_ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      UserRole @default(EMPLOYEE)
+  status    UserStatus @default(ACTIVE)
+  avatar    String?
+  
+  // Employment info
+  position      String?
+  departmentId  String?  @map("department_id")
+  department    Department? @relation(fields: [departmentId], references: [id])
+  managerId     String?  @map("manager_id")
+  manager       User?    @relation("ManagerEmployee", fields: [managerId], references: [id])
+  employees     User[]   @relation("ManagerEmployee")
+  
+  // Billing settings
+  defaultHourlyRate Decimal? @map("default_hourly_rate") @db.Decimal(10, 2)
+  weeklyHourGoal    Decimal  @default(44) @map("weekly_hour_goal") @db.Decimal(5, 2)
+  
+  // Time tracking
+  timeEntries   TimeEntry[]
+  timesheets    Timesheet[]
+  
+  // Approvals
+  approvalsGiven     TimesheetApproval[] @relation("ApproverTimesheets")
+  approvalsReceived  TimesheetApproval[] @relation("SubmitterTimesheets")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  nameEs      String?  @map("name_es") // Spanish name
+  description String?
+  code        String?  @unique // E.g., "DES", "DEV", "MKT"
+  color       String?  // For UI
+  
+  users       User[]
+  tasks       Task[]
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("departments")
+}
+
+// ============================================
+// CLIENT & PROJECT MANAGEMENT
+// ============================================
+
+model Client {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String?  @unique // e.g., "NIKE", "COCA"
+  logo        String?
+  color       String?  // Brand color for UI
+  contactName String?  @map("contact_name")
+  contactEmail String? @map("contact_email")
+  contactPhone String? @map("contact_phone")
+  
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  brands      Brand[]
+  projects    Project[]
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("clients")
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  name      String
+  code      String?  // e.g., "COKE_ZERO"
+  logo      String?
+  
+  clientId  String   @map("client_id")
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  campaigns Campaign[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([clientId, name])
+  @@map("brands")
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  code        String?
+  description String?
+  
+  brandId     String   @map("brand_id")
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  
+  projects    Project[]
+  
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([brandId, name])
+  @@map("campaigns")
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  name          String
+  code          String?       @unique // e.g., "PRJ-001"
+  description   String?
+  status        ProjectStatus @default(ACTIVE)
+  
+  // Hierarchy
+  clientId      String        @map("client_id")
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  campaignId    String?       @map("campaign_id")
+  campaign      Campaign?     @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  // Budget
+  estimatedHours Decimal?     @map("estimated_hours") @db.Decimal(10, 2)
+  budgetAmount   Decimal?     @map("budget_amount") @db.Decimal(12, 2)
+  
+  // Dates
+  startDate     DateTime?     @map("start_date")
+  endDate       DateTime?     @map("end_date")
+  
+  // Relations
+  tasks         Task[]
+  timeEntries   TimeEntry[]
+  
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+// ============================================
+// TASK MANAGEMENT
+// ============================================
+
+enum TaskType {
+  DESIGN
+  COPYWRITING
+  DEVELOPMENT
+  STRATEGY
+  MEETING
+  RESEARCH
+  PRODUCTION
+  REVIEW
+  OTHER
+}
+
+model Task {
+  id            String   @id @default(cuid())
+  name          String
+  nameEs        String?  @map("name_es")
+  description   String?
+  type          TaskType
+  
+  projectId     String   @map("project_id")
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  departmentId  String?  @map("department_id")
+  department    Department? @relation(fields: [departmentId], references: [id])
+  
+  // Billing
+  isBillable    Boolean  @default(true) @map("is_billable")
+  hourlyRate    Decimal? @map("hourly_rate") @db.Decimal(10, 2)
+  
+  // Budget
+  estimatedHours Decimal? @map("estimated_hours") @db.Decimal(10, 2)
+  
+  isActive      Boolean  @default(true) @map("is_active")
+  
+  timeEntries   TimeEntry[]
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("tasks")
+}
+
+// ============================================
+// TIME TRACKING
+// ============================================
+
+model TimeEntry {
+  id          String   @id @default(cuid())
+  
+  // User
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Project & Task
+  projectId   String   @map("project_id")
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId      String   @map("task_id")
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  // Time details
+  date        DateTime @db.Date
+  hours       Decimal  @db.Decimal(5, 2)
+  
+  // Billing
+  isBillable  Boolean  @default(true) @map("is_billable")
+  hourlyRate  Decimal? @map("hourly_rate") @db.Decimal(10, 2)
+  
+  // Notes
+  notes       String?  @db.Text
+  
+  // Timesheet relation
+  timesheetId String?  @map("timesheet_id")
+  timesheet   Timesheet? @relation(fields: [timesheetId], references: [id], onDelete: SetNull)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId, date])
+  @@index([projectId])
+  @@index([timesheetId])
+  @@map("time_entries")
+}
+
+// ============================================
+// TIMESHEET & APPROVALS
+// ============================================
+
+enum TimesheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model Timesheet {
+  id          String          @id @default(cuid())
+  
+  // User
+  userId      String          @map("user_id")
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Week period
+  weekStart   DateTime        @map("week_start") @db.Date
+  weekEnd     DateTime        @map("week_end") @db.Date
+  
+  // Status
+  status      TimesheetStatus @default(DRAFT)
+  
+  // Summary
+  totalHours       Decimal @default(0) @map("total_hours") @db.Decimal(10, 2)
+  billableHours    Decimal @default(0) @map("billable_hours") @db.Decimal(10, 2)
+  nonBillableHours Decimal @default(0) @map("non_billable_hours") @db.Decimal(10, 2)
+  
+  // Relations
+  timeEntries TimeEntry[]
+  approvals   TimesheetApproval[]
+  
+  submittedAt DateTime? @map("submitted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, weekStart])
+  @@index([status])
+  @@map("timesheets")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model TimesheetApproval {
+  id            String         @id @default(cuid())
+  
+  timesheetId   String         @map("timesheet_id")
+  timesheet     Timesheet      @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  
+  approverId    String         @map("approver_id")
+  approver      User           @relation("ApproverTimesheets", fields: [approverId], references: [id])
+  
+  submitterId   String         @map("submitter_id")
+  submitter     User           @relation("SubmitterTimesheets", fields: [submitterId], references: [id])
+  
+  status        ApprovalStatus @default(PENDING)
+  
+  // Rejection details
+  rejectionReason String?      @map("rejection_reason") @db.Text
+  
+  approvedAt    DateTime?      @map("approved_at")
+  rejectedAt    DateTime?      @map("rejected_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@index([approverId, status])
+  @@map("timesheet_approvals")
+}

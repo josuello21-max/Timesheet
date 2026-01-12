@@ -1,0 +1,466 @@
+{
+    "info": {
+        "name": "Star5 Timesheet API",
+        "description": "Collection for Star5 Timesheet Management System API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"test@star5.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"role\": \"EMPLOYEE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"maria@star5.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Me",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Time Entries",
+            "item": [
+                {
+                    "name": "Create Time Entry",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"projectId\": \"{{project_id}}\",\n  \"taskId\": \"{{task_id}}\",\n  \"date\": \"2024-01-15\",\n  \"hours\": 8,\n  \"isBillable\": true,\n  \"hourlyRate\": 75,\n  \"notes\": \"Working on campaign designs\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/time-entries",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "time-entries"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Time Entries",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/time-entries?startDate=2024-01-01&endDate=2024-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "time-entries"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Weekly Summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/time-entries/weekly-summary?startDate=2024-01-15&endDate=2024-01-21",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "time-entries",
+                                "weekly-summary"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2024-01-15"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2024-01-21"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Timesheets",
+            "item": [
+                {
+                    "name": "Create or Get Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"weekStart\": \"2024-01-15\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/timesheets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "timesheets"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Timesheet",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/timesheets/{{timesheet_id}}/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "timesheets",
+                                "{{timesheet_id}}",
+                                "submit"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Pending Approvals (Manager)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{manager_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/timesheets/pending-approvals",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "timesheets",
+                                "pending-approvals"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Approve Timesheet (Manager)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{manager_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/timesheets/{{timesheet_id}}/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "timesheets",
+                                "{{timesheet_id}}",
+                                "approve"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reject Timesheet (Manager)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{manager_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"rejectionReason\": \"Missing hours for Tuesday. Please update and resubmit.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/timesheets/{{timesheet_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "timesheets",
+                                "{{timesheet_id}}",
+                                "reject"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Projects",
+            "item": [
+                {
+                    "name": "Get All Projects",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "projects"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Project By ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/projects/{{project_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{project_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Project Tasks",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/projects/{{project_id}}/tasks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "projects",
+                                "{{project_id}}",
+                                "tasks"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Project (Manager/Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{manager_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New Campaign 2024\",\n  \"code\": \"PRJ-100\",\n  \"description\": \"Digital campaign for new product launch\",\n  \"status\": \"PLANNING\",\n  \"clientId\": \"{{client_id}}\",\n  \"estimatedHours\": 150,\n  \"budgetAmount\": 22500,\n  \"startDate\": \"2024-02-01\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "projects"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/health",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000/api/v1",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "manager_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "project_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "task_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "timesheet_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
