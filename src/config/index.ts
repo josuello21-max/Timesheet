@@ -18,7 +18,8 @@ export const config = {
     },
 
     cors: {
-        origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3001'],
+        // Permitir todo ('*') por defecto si no hay variable específica
+        origin: process.env.CORS_ORIGIN || '*',
         credentials: true,
     },
 
