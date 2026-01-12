@@ -20,7 +20,6 @@ export const config = {
     cors: {
         // Permitir todo ('*') por defecto si no hay variable específica
         origin: process.env.CORS_ORIGIN || '*',
-        credentials: true,
     },
 
     pagination: {
