@@ -10,7 +10,7 @@ import { errorHandler } from './middleware/errorHandler';
 const app: Application = express();
 
 // Security middleware
-app.use(helmet());
+// app.use(helmet()); // Desactivado temporalmente para depuración
 
 // CORS configuration
 app.use(cors(config.cors));
